@@ -9,7 +9,9 @@
       text-align: center;
       background: #f2f2f2;
     }
-    h1 { margin-top: 20px; }
+    h1 {
+      margin-top: 20px;
+    }
     #board {
       display: grid;
       grid-template-columns: repeat(3, 100px);
@@ -17,7 +19,6 @@
       gap: 5px;
       margin: 20px auto;
       width: max-content;
-      position: relative;
     }
     .cell {
       width: 100px;
@@ -30,17 +31,14 @@
       cursor: pointer;
       border: 2px solid #333;
     }
-    #status { margin-top: 20px; font-size: 1.2em; }
-    button { margin-top: 20px; padding: 10px 20px; font-size: 1em; }
-    .line {
-      position: absolute;
-      background: red;
-      height: 5px;
-      width: 310px;
-      top: 0;
-      left: -5px;
-      transform-origin: left center;
-      display: none;
+    #status {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
     }
   </style>
 </head>
@@ -66,22 +64,6 @@
       board.appendChild(cell);
     }
 
-    // Create line for winning
-    const line = document.createElement("div");
-    line.classList.add("line");
-    board.appendChild(line);
-
-    const winPatterns = [
-      { pattern: [0,1,2], transform: 'translateY(50px) rotate(0deg)' },
-      { pattern: [3,4,5], transform: 'translateY(155px) rotate(0deg)' },
-      { pattern: [6,7,8], transform: 'translateY(260px) rotate(0deg)' },
-      { pattern: [0,3,6], transform: 'translateY(155px) rotate(90deg)' },
-      { pattern: [1,4,7], transform: 'translateY(260px) rotate(90deg)' },
-      { pattern: [2,5,8], transform: 'translateY(365px) rotate(90deg)' },
-      { pattern: [0,4,8], transform: 'translateY(155px) rotate(45deg)' },
-      { pattern: [2,4,6], transform: 'translateY(155px) rotate(-45deg)' }
-    ];
-
     function cellClick(e) {
       const index = e.target.dataset.index;
       if (cells[index] !== "" || !gameActive) return;
@@ -89,11 +71,9 @@
       cells[index] = currentPlayer;
       e.target.textContent = currentPlayer;
 
-      const winInfo = checkWin();
-      if (winInfo) {
+      if (checkWin()) {
         statusText.textContent = `Player ${currentPlayer} wins!`;
         gameActive = false;
-        showLine(winInfo.transform);
       } else if (cells.every(cell => cell !== "")) {
         statusText.textContent = "It's a draw!";
         gameActive = false;
@@ -104,18 +84,14 @@
     }
 
     function checkWin() {
-      for (let i = 0; i < winPatterns.length; i++) {
-        const { pattern, transform } = winPatterns[i];
-        if (pattern.every(index => cells[index] === currentPlayer)) {
-          return { pattern, transform };
-        }
-      }
-      return null;
-    }
-
-    function showLine(transform) {
-      line.style.display = 'block';
-      line.style.transform = transform;
+      const winPatterns = [
+        [0,1,2], [3,4,5], [6,7,8], // rows
+        [0,3,6], [1,4,7], [2,5,8], // columns
+        [0,4,8], [2,4,6]           // diagonals
+      ];
+      return winPatterns.some(pattern => {
+        return pattern.every(index => cells[index] === currentPlayer);
+      });
     }
 
     function resetGame() {
@@ -124,7 +100,6 @@
       currentPlayer = "X";
       gameActive = true;
       statusText.textContent = "Player X's turn";
-      line.style.display = 'none';
     }
   </script>
 </body>
